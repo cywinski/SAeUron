@@ -1,0 +1,41 @@
+{
+    "overall": {
+        "task": "classifier",
+        "attacker": "text_grad",
+        "logger": "json",
+        "resume": null
+    },
+    "task": {
+        "concept": "Abstractionism",
+        "model_name_or_path": "checkpoints/unlearn_canvas_checkpoints/diffusion/diffuser/style50",
+        "cache_path": "../cache",
+        "dataset_path": "datasets/style_unlearn/",
+        "criterion": "l2",
+        "sae_path": "",
+        "style_latents_path": "",
+        "hookpoint": "up_blocks.1.attentions.2",
+        "percentile": 99.999,
+        "multiplier": -1.0,
+        "style_ckpt": "checkpoints/unlearn_canvas_checkpoints/cls_model/style50.pth",
+        "class_ckpt": "checkpoints/unlearn_canvas_checkpoints/cls_model/style50_cls.pth",
+        "class_name": ""
+    },
+    "attacker": {
+        "insertion_location": "prefix_k",
+        "k": 5,
+        "iteration": 40,
+        "attack_idx": 0,
+        "eval_seed": 0,
+        "universal": false,
+        "sequential": true,
+        "text_grad": {
+            "lr": 0.01,
+            "weight_decay": 0.1
+        }
+    },
+    "logger": {
+        "json": {
+            "root": ""
+        }
+    }
+}
