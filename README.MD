@@ -1,5 +1,9 @@
 # SAeUron: Interpretable Concept Unlearning in Diffusion Models with Sparse Autoencoders
 
+<img src="images/schema_method_nums_new.jpg" width="80%" alt="teaser">
+
+> Overview of the SAeUron method.
+
 ## 1. Setup
 
 ### 1.1 Prepare the UnlearnCanvas benchmark
@@ -159,3 +163,6 @@ Evaluate unlearning performance for object unlearning:
 ```bash
 python scripts/avg_accuracy_cls_diffatk.py --input_dir <path/to/saved/images> --attk_idxs [<idxs>]
 ```
+
+## Acknowledgements
+This repository uses code from [ElutherAI repo](https://github.com/EleutherAI/sae) and [Unpacking SDXL-Turbo repo](https://github.com/surkovv/sdxl-unbox).
