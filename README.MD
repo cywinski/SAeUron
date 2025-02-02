@@ -1,6 +1,6 @@
 # SAeUron: Interpretable Concept Unlearning in Diffusion Models with Sparse Autoencoders
 
-<img src="images/schema_method_nums_new.jpg" width="80%" alt="teaser">
+<img src="images/schema_method_nums_new.jpg" width="100%" alt="schema">
 
 > Overview of the SAeUron method.
 
