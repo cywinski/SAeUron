@@ -9,7 +9,9 @@
 ### 1.2 Prepare the environment
 ```bash
 pip install uv
-uv install -r requirements.txt
+uv venv --python 3.10
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
 
 
@@ -29,7 +31,7 @@ All arguments to the script are listed in `CacheActivationsRunnerConfig`.
 
 To collect dataset for SAEs trained in our paper, run:
 ```bash
-python scripts/collect_activations_unlearn_canvas.py --hook_names unet.up_blocks.1.attentions.1 unet.up_blocks.1.attentions.2 --model_name <path/to/diffusion/model> --guidance_scale 9.0
+python scripts/collect_activations_unlearn_canvas.py --hook_names unet.up_blocks.1.attentions.1 unet.up_blocks.1.attentions.2 --model_name <path/to/diffusion/model>
 ```
 
 ## 3. Train sparse autoencoders
@@ -40,12 +42,12 @@ python scripts/train.py --dataset_path <path/to/dataset> --hookpoints <hook_name
 
 To reproduce training from our paper for `up.1.1` block run:
 ```bash
-python train.py ----dataset_path <path/to/dataset> --hookpoints unet.up_blocks.1.attentions.1 --effective_batch_size 4096 --auxk_alpha 0.03125 --expansion_factor 16 --k 32 --multi_topk False --num_workers 4 --wandb_log_frequency 4000 --cond_encoder False --num_epochs 5 --dead_feature_threshold 10_000_000 --lr 4e-4 --lr_scheduler linear --lr_warmup_steps 0 --batch_topk True
+python train.py --dataset_path <path/to/dataset> --hookpoints unet.up_blocks.1.attentions.1 --effective_batch_size 4096 --auxk_alpha 0.03125 --expansion_factor 16 --k 32 --multi_topk False --num_workers 4 --wandb_log_frequency 4000 --num_epochs 5 --dead_feature_threshold 10_000_000 --lr 4e-4 --lr_scheduler linear --lr_warmup_steps 0 --batch_topk True
 ```
 
 To reproduce training from our paper for `up.1.2` block run:
 ```bash
-python train.py ----dataset_path <path/to/dataset> --hookpoints unet.up_blocks.1.attentions.2 --effective_batch_size 4096 --auxk_alpha 0.03125 --expansion_factor 16 --k 32 --multi_topk False --num_workers 4 --wandb_log_frequency 4000 --cond_encoder False --num_epochs 10 --dead_feature_threshold 10_000_000 --lr 4e-4 --lr_scheduler linear --lr_warmup_steps 0 --batch_topk True
+python train.py --dataset_path <path/to/dataset> --hookpoints unet.up_blocks.1.attentions.2 --effective_batch_size 4096 --auxk_alpha 0.03125 --expansion_factor 16 --k 32 --multi_topk False --num_workers 4 --wandb_log_frequency 4000 --num_epochs 10 --dead_feature_threshold 10_000_000 --lr 4e-4 --lr_scheduler linear --lr_warmup_steps 0 --batch_topk True
 ```
 
 Training checkpoints will be stored under `sae-ckpts` directory.

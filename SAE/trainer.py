@@ -190,11 +190,9 @@ class SaeTrainer:
         for _ in range(self.cfg.num_epochs):
             for batch_dict in zip(*dataloaders.values()):
                 hidden_dict = {}
-                timestep_dict = {}
                 start_loading = time()
                 for hook, batch in zip(dataloaders.keys(), batch_dict):
                     hidden_dict[hook] = batch["activations"]
-                    timestep_dict[hook] = batch["timestep"]
                 data_loading_time = time() - start_loading
 
                 # Bookkeeping for dead feature detection
@@ -203,12 +201,8 @@ class SaeTrainer:
 
                 if self.cfg.distribute_modules:
                     hidden_dict = self.scatter_hiddens(hidden_dict)
-                    timestep_dict = self.scatter_hiddens(timestep_dict)
 
-                for name, (hiddens, timesteps) in zip(
-                    self.local_hookpoints(),
-                    zip(hidden_dict.values(), timestep_dict.values()),
-                ):
+                for name, hiddens in zip(self.local_hookpoints(), hidden_dict.values()):
                     raw = self.saes[name]  # 'raw' never has a DDP wrapper
                     # On the first iteration, initialize the decoder bias
                     if self.global_step == 0:
@@ -244,15 +238,10 @@ class SaeTrainer:
                     wrapped = maybe_wrapped[name]
 
                     # Save memory by chunking the activations
-                    for chunk_hiddens, chunk_timestep in zip(
-                        hiddens.chunk(self.cfg.micro_acc_steps),
-                        timesteps.chunk(self.cfg.micro_acc_steps),
-                    ):
+                    for chunk_hiddens in hiddens.chunk(self.cfg.micro_acc_steps):
                         chunk_hiddens = chunk_hiddens.to(device)
-                        chunk_timestep = chunk_timestep.to(device)
                         out = wrapped(
                             chunk_hiddens,
-                            chunk_timestep,
                             dead_mask=(
                                 self.num_tokens_since_fired[name]
                                 > self.cfg.dead_feature_threshold

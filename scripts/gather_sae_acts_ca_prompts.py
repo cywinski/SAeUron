@@ -87,7 +87,7 @@ def main(checkpoint_path, hookpoint, pipe_path, save_dir, steps=100, seed=188):
         with torch.no_grad():
             for i in range(len(prompts)):
                 sae_in = activations[i].reshape(steps, -1, sae.d_in)
-                top_acts, top_indices = sae.encode(sae_in.to(sae.device), None)
+                top_acts, top_indices = sae.encode(sae_in.to(sae.device))
                 sae_out = torch.zeros(
                     (top_acts.shape[0], sae.num_latents),
                     device=sae.device,

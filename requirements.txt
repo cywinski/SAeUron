@@ -1,5 +1,6 @@
 accelerate==1.0.1
 bitsandbytes==0.44.1
+datasets==3.2.0
 diffusers==0.29.2
 einops==0.8.0
 fire==0.7.0
