@@ -1,10 +1,13 @@
 # SAeUron: Interpretable Concept Unlearning in Diffusion Models with Sparse Autoencoders
+[![arXiv](https://img.shields.io/badge/arXiv-2501.18052-b31b1b.svg?style=flat)](https://arxiv.org/abs/2501.18052)
+[![Model on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-sm.svg)](https://huggingface.co/bcywinski/SAeUron)
+
 
 <img src="images/schema_method_nums_new.jpg" width="100%" alt="schema">
 
 > Overview of the SAeUron method.
 
-## 1. Setup
+## 1. 🚀 Setup
 
 ### 1.1 Prepare the UnlearnCanvas benchmark
 1. Download the dataset from [Google Drive]([text](https://drive.google.com/drive/folders/1-1Sc8h_tGArZv5Y201ugTF0K0D_Xn2lM)).
@@ -17,9 +20,18 @@ uv venv --python 3.10
 source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
+### 1.3 Load trained SAEs from Hugging Face Hub
+```bash
+python scripts/load_from_hub.py --name bcywinski/SAeUron --hookpoint unet.up_blocks.1.attentions.1 --save_path sae-ckpts
+```
 
+```bash
+python scripts/load_from_hub.py --name bcywinski/SAeUron --hookpoint unet.up_blocks.1.attentions.2 --save_path sae-ckpts
+```
 
-## 2. Collect activations from diffusion model
+If you do not want to train SAEs from scratch, you can skip steps 2 and 3.
+
+## 2. 💾 Collect activations from diffusion model
 Create a dataset of activations for SAEs trainings using the _anchor prompts_:
 
 ```bash
@@ -38,7 +50,7 @@ To collect dataset for SAEs trained in our paper, run:
 python scripts/collect_activations_unlearn_canvas.py --hook_names unet.up_blocks.1.attentions.1 unet.up_blocks.1.attentions.2 --model_name <path/to/diffusion/model>
 ```
 
-## 3. Train sparse autoencoders
+## 3. 🚆 Train sparse autoencoders
 To train SAEs on previously gathered dataset of activations, run:
 ```bash
 python scripts/train.py --dataset_path <path/to/dataset> --hookpoints <hook_name>
@@ -56,7 +68,7 @@ python train.py --dataset_path <path/to/dataset> --hookpoints unet.up_blocks.1.a
 
 Training checkpoints will be stored under `sae-ckpts` directory.
 
-## 4. Collect SAE feature activations on validation set
+## 4. 💾 Collect SAE feature activations on validation set
 To collect SAE feature activations for style unlearning run:
 ```bash
 python scripts/gather_sae_acts_ca_prompts.py --checkpoint_path "<path/to/sae/checkpoint>" --hookpoint "unet.up_blocks.1.attentions.2" --pipe_path "<path/to/diffusion/model>" --save_dir "<path/to/style/activations>"
@@ -69,7 +81,7 @@ python scripts/gather_sae_acts_ca_prompts_cls.py --checkpoint_path "<path/to/sae
 
 Feature activations will be saved as `pickle` files.
 
-## 5. Unlearning
+## ❌ 5. Unlearning
 All sampling scripts support distributed setup using `accelerate`. If no distributed environment is available, set `--num-processes=1`.
 
 
@@ -164,5 +176,15 @@ Evaluate unlearning performance for object unlearning:
 python scripts/avg_accuracy_cls_diffatk.py --input_dir <path/to/saved/images> --attk_idxs [<idxs>]
 ```
 
-## Acknowledgements
+## 📚 Bibtex
+```bibtex
+@article{cywinski2025saeuron,
+  title={SAeUron: Interpretable Concept Unlearning in Diffusion Models with Sparse Autoencoders},
+  author={Cywi{\'n}ski, Bartosz and Deja, Kamil},
+  journal={arXiv preprint arXiv:2501.18052},
+  year={2025}
+}
+```
+
+## 📚 Acknowledgements
 This repository uses code from [ElutherAI repo](https://github.com/EleutherAI/sae) and [Unpacking SDXL-Turbo repo](https://github.com/surkovv/sdxl-unbox).

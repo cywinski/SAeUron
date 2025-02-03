@@ -160,6 +160,8 @@ class Sae(nn.Module):
             # TODO: Maybe be more fine-grained about this in the future?
             strict=decoder,
         )
+        sae.cfg.batch_topk = False
+        sae.cfg.sample_topk = False
         return sae
 
     def save_to_disk(self, path: Path | str):
