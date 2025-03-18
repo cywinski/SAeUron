@@ -170,3 +170,58 @@ class SAEMaskedUnlearningHook:
         self.timestep_idx += 1
 
         return (hook_output,)
+
+
+class SAEFeatureInterventionHook:
+    def __init__(
+        self,
+        sae,
+        feature_idx,
+        multiplier,
+    ):
+        """Simple hook that multiplies specific SAE feature activations by a scalar.
+
+        Args:
+            sae: The trained SAE model
+            feature_idx: Index of the feature to modify
+            multiplier: Factor to multiply the feature activation by
+        """
+        self.sae = sae
+        self.feature_idx = feature_idx
+        self.multiplier = multiplier
+
+    @torch.no_grad()
+    def __call__(self, module, input, output):
+        output1, output2 = output[0].chunk(2)
+        # reshape to SAE input shape
+        output1 = output1.permute(0, 2, 3, 1).reshape(
+            len(output1), output1.shape[-1] * output1.shape[-2], -1
+        )
+        output2 = output2.permute(0, 2, 3, 1).reshape(
+            len(output2), output2.shape[-1] * output2.shape[-2], -1
+        )
+        output_cat = torch.cat([output1, output2], dim=0)
+
+        # Encode activations
+        sae_input, _, _ = self.sae.preprocess_input(output_cat)
+        pre_acts = self.sae.pre_acts(sae_input)
+        top_acts, top_indices = self.sae.select_topk(pre_acts)
+        buf = top_acts.new_zeros(top_acts.shape[:-1] + (self.sae.W_dec.mT.shape[-1],))
+        latents = buf.scatter_(dim=-1, index=top_indices, src=top_acts)
+
+        # Modify specified feature activation
+        latents[..., self.feature_idx] *= self.multiplier
+
+        # Decode modified activations
+        sae_out = (latents @ self.sae.W_dec) + self.sae.b_dec
+
+        # Reshape back to original format
+        h = w = int(np.sqrt(output2.shape[-2]))
+        hook_output = sae_out.reshape(
+            len(output_cat),
+            h,
+            w,
+            -1,
+        ).permute(0, 3, 1, 2)
+
+        return (hook_output,)
