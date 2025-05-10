@@ -178,10 +178,10 @@ python scripts/avg_accuracy_cls_diffatk.py --input_dir <path/to/saved/images> --
 
 ## 📚 Bibtex
 ```bibtex
-@article{cywinski2025saeuron,
+@inproceedings{cywinski2025saeuron,
   title={SAeUron: Interpretable Concept Unlearning in Diffusion Models with Sparse Autoencoders},
   author={Cywi{\'n}ski, Bartosz and Deja, Kamil},
-  journal={arXiv preprint arXiv:2501.18052},
+  booktitle={Forty-second International Conference on Machine Learning},
   year={2025}
 }
 ```
