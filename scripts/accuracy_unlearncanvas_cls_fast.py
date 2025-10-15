@@ -127,8 +127,9 @@ def main(
                     input_dir,
                     f"{object_class}_seed{s}.jpg",
                 )
-                class_image_paths.append(class_image_path)
-                class_labels.append(class_label_map[object_class])
+                if class_image_path not in class_image_paths:
+                    class_image_paths.append(class_image_path)
+                    class_labels.append(class_label_map[object_class])
 
     style_dataset = ImageDataset(style_image_paths, style_labels)
     class_dataset = ImageDataset(class_image_paths, class_labels)
@@ -160,17 +161,18 @@ def main(
                 style_results["pred_loss"][test_theme] += style_softmax[i][
                     batch_style_labels[i]
                 ].item()
-                style_results["acc"][test_theme] += (
-                    style_pred_success[i].item()
-                    * 1.0
-                    / (len(classes_to_use) * len(seed))
-                )
+                style_results["acc"][test_theme] += style_pred_success[i].item()
                 misclassified_as = theme_available[style_pred_labels[i].item()]
                 style_results["misclassified"][test_theme][misclassified_as] += 1
 
-        if not dry_run:
-            style_output_path = os.path.join(output_dir, f"{cls}.pth")
-            torch.save(style_results, style_output_path)
+    for theme in theme_available:
+        total_samples_for_theme = sum(style_results["misclassified"][theme].values())
+        if total_samples_for_theme > 0:
+            style_results["acc"][theme] = (style_results["acc"][theme] / total_samples_for_theme)
+
+    if not dry_run:
+        style_output_path = os.path.join(output_dir, f"{cls}.pth")
+        torch.save(style_results, style_output_path)
 
     for batch_images, batch_class_labels in tqdm(class_dataloader):
         batch_images = batch_images.to(device)
@@ -191,19 +193,18 @@ def main(
                 class_results["pred_loss"][object_class] += class_softmax[i][
                     batch_class_labels[i]
                 ].item()
-                class_results["acc"][object_class] += (
-                    class_pred_success[i].item()
-                    * 1.0
-                    / (
-                        (len(theme_available) - 1) * len(seed) * 2
-                    )  # exclude Seed_Images
-                )
+                class_results["acc"][object_class] += class_pred_success[i].item()
                 misclassified_as = class_available[class_pred_labels[i].item()]
                 class_results["misclassified"][object_class][misclassified_as] += 1
 
-        if not dry_run:
-            class_output_path = os.path.join(output_dir, f"{cls}_cls.pth")
-            torch.save(class_results, class_output_path)
+    for object_class in class_available:
+        total_samples_for_class = sum(class_results["misclassified"][object_class].values())
+        if total_samples_for_class > 0:
+            class_results["acc"][object_class] = class_results["acc"][object_class] / total_samples_for_class
+
+    if not dry_run:
+        class_output_path = os.path.join(output_dir, f"{cls}_cls.pth")
+        torch.save(class_results, class_output_path)
 
 
 if __name__ == "__main__":
