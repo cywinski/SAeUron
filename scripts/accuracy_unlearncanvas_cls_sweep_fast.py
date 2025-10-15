@@ -117,13 +117,15 @@ def main(
                 class_results["pred_loss"][object_class] += class_softmax[i][
                     batch_class_labels[i]
                 ].item()
-                class_results["acc"][object_class] += (
-                    class_pred_success[i].item()
-                    * 1.0
-                    / (len(classes_to_use) * len(seed))
-                )
+                class_results["acc"][object_class] += class_pred_success[i].item()
                 misclassified_as = class_available[class_pred_labels[i].item()]
                 class_results["misclassified"][object_class][misclassified_as] += 1
+
+        for object_class in class_available:
+            total_samples_for_class = sum(class_results["misclassified"][object_class].values())
+        
+            if total_samples_for_class > 0:
+                class_results["acc"][object_class] = class_results["acc"][object_class] / total_samples_for_class
 
         if not dry_run:
             class_output_path = os.path.join(output_dir, f"{cls}_cls.pth")
